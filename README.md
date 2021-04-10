@@ -1,5 +1,5 @@
 # CoinCap python Wrapper
-A python wrapper for the coincap API
+A python wrapper for the coincap API, returns data as structured dictonary where keys repsond to json item names
 
 ## Usage
 
@@ -8,12 +8,6 @@ from coincap import CoinCap
 
 coincap = CoinCap()
 ```
-
- 
-### Get list of all assets
- ```
- coincap.get_assets()
- ```
 
 ### Get single asset data
  ```
@@ -35,4 +29,10 @@ changePercent24Hr	"1.7838575668641382"
 vwap24Hr	"59796.2948055513798961"
 explorer	"https://blockchain.info/"
 timestamp	1618093941684
+```
+##### Example
+
+```
+repsonse[data][id] -> bitcoin
+repsonse[data][priceUsd] -> 59327.9678729268120594
 ```
