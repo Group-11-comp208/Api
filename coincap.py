@@ -3,11 +3,12 @@ import json
 
 URL = 'https://api.coincap.io/v2/'
 
-class CoinCap():
+class CoinCap:
     def __init__(self, url=URL):
         self.url = url
 
     def _query(self, endpoint):
+        """Returns json as dictionary"""
         response = requests.request("GET", self.url + endpoint)
 
         if response.status_code != 200:
@@ -43,9 +44,6 @@ class CoinCap():
     def get_markets(self):
         return self._query("markets")
 
-    def get_asset_candle(self, base_Id, quote_Id, exchange, interval="d1"):
-        return self._query("candles?exchange={}&interval={}&baseId={}&quoteId={}".format(exchange, interval, base_Id, quote_Id))
-
-
-coincap = CoinCap()
-print(coincap.get_asset_candle("ethereum", "bitcoin", exchange="poloniex"))
+    def get_asset_candle(self, base_id, quote_id, exchange, interval="d1"):
+        return self._query(
+            "candles?exchange={}&interval={}&baseId={}&quoteId={}".format(exchange, interval, base_id, quote_id))
