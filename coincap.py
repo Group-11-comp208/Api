@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 
 URL = 'https://api.coincap.io/v2/'
 
@@ -16,6 +17,11 @@ class CoinCap:
 
         response = json.loads(response.text)
         return response
+
+    def _get_date(self, num_days):
+        end = time.time() * 1000
+        start = end - (num_days * 86400000)
+        return start, end
 
     def get_assets(self):
         return self._query("assets")
@@ -45,5 +51,6 @@ class CoinCap:
         return self._query("markets")
 
     def get_asset_candle(self, base_id, quote_id, exchange, interval="d1"):
+        start, end = self._get_date(14)
         return self._query(
-            "candles?exchange={}&interval={}&baseId={}&quoteId={}".format(exchange, interval, base_id, quote_id))
+            "candles?exchange={}&interval={}&baseId={}&quoteId={}&start={}&end={}".format(exchange, interval, base_id, quote_id, start, end))
