@@ -10,6 +10,8 @@ class Candle:
         self.api = coincap.CoinCap()
         self.asset = base_id
         self.candle = self.api.get_asset_candle(base_id, exchange)
+
+        # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle['data']).astype(float)
         self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
 
@@ -36,6 +38,7 @@ class Candle:
         return obv
 
     def plot_candle(self):
+        """ Plots the candlesticks for a given time period"""
         symbol = self.api.get_symbol(self.asset)
         df = self.df
         fig = go.Figure(data=[go.Candlestick(x=df['period'],
