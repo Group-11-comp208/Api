@@ -1,12 +1,17 @@
 import coincap
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
+from datetime import datetime
+
 
 class Candle:
     def __init__(self, base_id, exchange, quote_id="bitcoin", interval="d1", time_period=14):
-        api = coincap.CoinCap()
-        self.candle = api.get_asset_candle(base_id,exchange="binance")
+        self.api = coincap.CoinCap()
+        self.asset = base_id
+        self.candle = self.api.get_asset_candle(base_id, exchange)
         self.df = pd.DataFrame(self.candle['data']).astype(float)
+        self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
 
     def get_rsi(self):
         """ Return relative strength indicator of a currency"""
@@ -30,6 +35,20 @@ class Candle:
 
         return obv
 
-candle = Candle("filecoin",exchange="binance")
-print(candle.get_obv())
+    def plot_candle(self):
+        symbol = self.api.get_symbol(self.asset)
+        df = self.df
+        fig = go.Figure(data=[go.Candlestick(x=df['period'],
+                                             open=df['open'],
+                                             high=df['high'],
+                                             low=df['low'],
+                                             close=df['close'])])
 
+        fig.update_layout(xaxis_rangeslider_visible=False,
+                          yaxis_title=symbol, xaxis_title="Time")
+        fig.show()
+        fig.write_image("fig1.png")
+
+
+candle = Candle("filecoin", exchange="binance")
+candle.plot_candle()
