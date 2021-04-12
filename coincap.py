@@ -54,3 +54,6 @@ class CoinCap:
         start, end = self._get_date(time_period)
         return self._query(
             "candles?exchange={}&interval={}&baseId={}&quoteId={}&start={}&end={}".format(exchange, interval, base_id, quote_id, start, end))
+
+    def get_symbol(self, asset):
+        return self.get_asset(asset)['data']['symbol']
