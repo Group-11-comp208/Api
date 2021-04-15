@@ -20,9 +20,9 @@ class Candle:
         diff = self.df['open'] - self.df['close']
 
         average_gain = diff[diff > 0].mean()
-        avergae_loss = diff[diff < 0].mean() * -1
+        average_loss = diff[diff < 0].mean() * -1
 
-        relative_strength = average_gain/avergae_loss
+        relative_strength = average_gain/average_loss
         relative_strength_indicator = 100 - 100 / (1 + relative_strength)
 
         return relative_strength_indicator
