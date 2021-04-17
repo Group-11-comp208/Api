@@ -27,7 +27,7 @@ class CoinCap:
         return self._query("assets")
 
     def get_asset(self, asset):
-        return self._query("assets/{}".format(asset))
+        return self._query("assets?limit=1&search={}".format(asset))['data'][0]
 
     def get_asset_history(self, asset, interval="d1"):
         return self._query("assets/{}/history?interval={}".format(asset, interval))
