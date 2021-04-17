@@ -9,7 +9,8 @@ class Candle:
     def __init__(self, base_id, exchange, quote_id="bitcoin", interval="d1", time_period=14):
         self.api = coincap.CoinCap()
         self.asset = base_id
-        self.candle = self.api.get_asset_candle(base_id, exchange, quote_id=quote_id, interval=interval, time_period=time_period)
+        self.candle = self.api.get_asset_candle(
+            base_id, exchange, quote_id=quote_id, interval=interval, time_period=time_period)
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle['data']).astype(float)
@@ -54,4 +55,4 @@ class Candle:
 
 
 #candle = Candle("xrp", exchange="binance")
-#candle.plot_candle()
+# candle.plot_candle()
