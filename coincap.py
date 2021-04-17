@@ -56,4 +56,4 @@ class CoinCap:
             "candles?exchange={}&interval={}&baseId={}&quoteId={}&start={}&end={}".format(exchange, interval, base_id, quote_id, start, end))
 
     def get_symbol(self, asset):
-        return self.get_asset(asset)['data']['symbol']
+        return self.get_asset(asset)['symbol']
