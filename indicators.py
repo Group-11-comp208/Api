@@ -31,16 +31,6 @@ class Candle:
 
         return relative_strength_indicator
 
-    def get_obv(self):
-        """ Returns on-balance volume indicator of a currency"""
-        diff = self.df[1] - self.df[4]
-
-        p_volume = np.sum(self.df['volume'][diff > 0])
-        n_volume = np.sum(self.df['volume'][diff < 0])
-        obv = p_volume - n_volume
-
-        return obv
-
     def plot_candle(self):
         """ Plots the candlesticks for a given time period"""
         symbol = self.api.get_symbol(self.id)
