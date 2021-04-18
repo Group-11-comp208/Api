@@ -13,7 +13,7 @@ class Candle:
         self.geko = geko.Geko()
         asset = self.api.get_asset(asset)
         self.id = asset['id']
-        self.candle = self.geko.get_asset_candle(self.id, time_period)
+        self.candle = self.geko.get_asset_candle(self.id, time_period=time_period, currency=currency)
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle).astype(float)
