@@ -50,10 +50,5 @@ class CoinCap:
     def get_markets(self):
         return self._query("markets")
 
-    def get_asset_candle(self, base_id, exchange, quote_id="bitcoin", interval="d1", time_period=14):
-        start, end = self._get_date(time_period)
-        return self._query(
-            "candles?exchange={}&interval={}&baseId={}&quoteId={}&start={}&end={}".format(exchange, interval, base_id, quote_id, start, end))
-
     def get_symbol(self, asset):
         return self.get_asset(asset)['symbol']
