@@ -5,9 +5,9 @@
 from forex_python.converter import CurrencyRates
 
 class currencyconvert:
-    def convert_currency(currencyA, currencyB, amount):
+    def convert_currency(input_currency, output_currency, amount):
         c = CurrencyRates()
-        converted_amount = amount * c.get_rate(currencyA, currencyB)
+        converted_amount = amount * c.get_rate(input_currency, output_currency)
         return converted_amount
 
 
