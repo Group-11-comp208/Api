@@ -55,7 +55,7 @@ class MovingAverages():
         self.api = coincap.CoinCap()
         self.asset = self.api.get_asset(asset)
         self.id = self.asset['id']
-        history = self.api.get_asset_history(asset, num_days=num_days)['data']
+        history = self.api.get_asset_history(self.id, num_days=num_days)['data']
         self.df = pd.DataFrame(
             history, columns=['priceUsd', 'time']).astype(float)
 
@@ -95,5 +95,5 @@ class MovingAverages():
         fig.write_image("moving_averages.png")
 
 
-average=MovingAverages("bitcoin")
+average=MovingAverages("eth")
 average.plot()
