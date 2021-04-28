@@ -5,11 +5,12 @@
 from forex_python.converter import CurrencyRates
 
 class currencyconvert:
-    def get_currency_rate(currencyA, currencyB):
+    def convert_currency(currencyA, currencyB, amount):
         c = CurrencyRates()
-        return(c.get_rate(currencyA, currencyB))
+        converted_amount = amount * c.get_rate(currencyA, currencyB)
+        return converted_amount
 
 
 if __name__ == '__main__':
     test = currencyconvert
-    print(test.get_currency_rate('USD', 'EUR'))
+    print(test.convert_currency('USD', 'GBP', 100))
