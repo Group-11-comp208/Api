@@ -13,7 +13,8 @@ class Candle:
         self.geko = geko.Geko()
         asset = self.api.get_asset(asset)
         self.id = asset['id']
-        self.candle = self.geko.get_asset_candle(self.id, time_period=time_period, currency=currency)
+        self.candle = self.geko.get_asset_candle(
+            self.id, time_period=time_period, currency=currency)
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle).astype(float)
@@ -45,3 +46,54 @@ class Candle:
                           yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol))
         fig.write_html("fig1.html")
         fig.write_image("fig1.png")
+
+
+class MovingAverages():
+    def __init__(self, asset, n=10, currency='usd', interval='d1', num_days=60):
+        self.n = n
+        self.currency = currency
+        self.api = coincap.CoinCap()
+        self.asset = self.api.get_asset(asset)
+        self.id = self.asset['id']
+        history = self.api.get_asset_history(asset, num_days=num_days)['data']
+        self.df = pd.DataFrame(
+            history, columns=['priceUsd', 'time']).astype(float)
+
+    def plot(self):
+        symbol = self.api.get_symbol(self.id)
+        alpha = 2 / (self.n + 1)
+
+        self.df.loc[0, 'ema'] = self.df.loc[0, 'priceUsd']
+
+        self.df['ema'] = self.df.ewm(alpha=alpha).mean()
+
+        self.df['sma'] = self.df['priceUsd'].rolling(self.n).mean()
+
+        exp1 = self.df['priceUsd'].ewm(span=12, adjust=False).mean()
+        exp2 = self.df['priceUsd'].ewm(span=26, adjust=False).mean()
+        self.df['mcad'] = exp1 - exp2
+
+        max_value = self.df['mcad'].max() * 1.5
+
+        fig = go.Figure(data=[go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Exponential Moving Average", name="EMA", y=self.df['ema'], line=dict(color='orange', width=2)),
+                              go.Scatter(x=pd.to_datetime(
+                                  self.df['time'], unit='ms'), text="Price", name="Price", y=self.df['priceUsd'], line=dict(color='red', width=2)),
+                              go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Simple Moving Average",
+                                         name="SMA", y=self.df['sma'], line=dict(color='green', width=2)),
+                              go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Moving average convergence divergence ", name="MACD", y=self.df['mcad'], line=dict(color='blue', width=2), yaxis='y2')])
+        
+        fig.update_layout(yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol), yaxis_tickformat=".0f", yaxis2=dict(title='MCAD', overlaying='y', side='right', range=[ -max_value, max_value]))
+
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01
+        ))
+
+
+        fig.write_image("moving_averages.png")
+
+
+average=MovingAverages("bitcoin")
+average.plot()

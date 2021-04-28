@@ -29,8 +29,9 @@ class CoinCap:
     def get_asset(self, asset):
         return self._query("assets?limit=1&search={}".format(asset))['data'][0]
 
-    def get_asset_history(self, asset, interval="d1"):
-        return self._query("assets/{}/history?interval={}".format(asset, interval))
+    def get_asset_history(self, asset, interval="d1", num_days=60):
+        start, end = self._get_date(num_days)
+        return self._query("assets/{}/history?interval={}&start={}&end={}".format(asset, interval, start, end))
 
     def get_asset_markets(self, asset):
         return self._query("assets/{}/markets".format(asset))
