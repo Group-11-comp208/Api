@@ -91,9 +91,4 @@ class MovingAverages():
             x=0.01
         ))
 
-
         fig.write_image("moving_averages.png")
-
-
-average=MovingAverages("eth")
-average.plot()
