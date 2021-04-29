@@ -50,16 +50,27 @@ class Candle:
 
 
 class MovingAverages():
-    def __init__(self, asset, n=10, currency='usd', interval='d1', num_days=120):
-        self.n = n
+    def __init__(self, asset, currency='usd', num_days=120):
+        self.n = 10
         self.currency = currency
         self.api = coincap.CoinCap()
         self.asset = self.api.get_asset(asset)
         self.id = self.asset['id']
         converter = Converter()
 
+        interval = "d1"
+        if num_days < 20:
+            self.n = 5
+            interval = "h12"
+        if num_days < 10:
+            self.n = 2
+            interval = "h6"
+        if num_days < 5:
+            self.n = 2
+            interval = "h2"
+
         history = self.api.get_asset_history(
-            self.id, num_days=num_days)['data']
+            self.id, num_days=num_days, interval=interval)['data']
         self.df = pd.DataFrame(
             history, columns=['priceUsd', 'time']).astype(float)
 
@@ -105,16 +116,27 @@ class MovingAverages():
 
 
 class BoilerBands:
-    def __init__(self, asset, n=10, currency='usd', interval='d1', num_days=120):
-        self.n = n
+    def __init__(self, asset, currency='usd', num_days=120):
+        self.n = 10
         self.currency = currency
         self.api = coincap.CoinCap()
         self.asset = self.api.get_asset(asset)
         self.id = self.asset['id']
         converter = Converter()
 
+        interval = "d1"
+        if num_days < 20:
+            self.n = 5
+            interval = "h12"
+        if num_days < 10:
+            self.n = 2
+            interval = "h6"
+        if num_days < 5:
+            self.n = 2
+            interval = "h2"
+
         history = self.api.get_asset_history(
-            self.id, num_days=num_days)['data']
+            self.id, num_days=num_days, interval=interval)['data']
         self.df = pd.DataFrame(
             history, columns=['priceUsd', 'time']).astype(float)
 
