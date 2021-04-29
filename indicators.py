@@ -11,8 +11,8 @@ class Candle:
         self.currency = currency
         self.api = coincap.CoinCap()
         self.geko = geko.Geko()
-        asset = self.api.get_asset(asset)
-        self.id = asset['id']
+        self.asset = self.api.get_asset(asset)
+        self.id = self.asset['id']
         self.candle = self.geko.get_asset_candle(
             self.id, time_period=time_period, currency=currency)
 
@@ -43,7 +43,7 @@ class Candle:
                                              close=df[4])])
 
         fig.update_layout(xaxis_rangeslider_visible=False,
-                          yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol))
+                          yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=".1f")
         fig.write_html("fig1.html")
         fig.write_image("fig1.png")
 
@@ -67,7 +67,7 @@ class MovingAverages():
 
         self.df['ema'] = self.df.ewm(alpha=alpha).mean()
 
-        self.df['sma'] = self.df['priceUsd'].rolling(self.n).mean()
+        self.df['sma'] = self.df['priceUsd'].rolling(window=self.n).mean()
 
         exp1 = self.df['priceUsd'].ewm(span=12, adjust=False).mean()
         exp2 = self.df['priceUsd'].ewm(span=26, adjust=False).mean()
