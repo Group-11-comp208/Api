@@ -5,6 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
 from fx import Converter
+import math
 
 
 class Candle:
@@ -14,7 +15,6 @@ class Candle:
         self.geko = geko.Geko()
         self.asset = self.api.get_asset(asset)
         self.id = self.asset['id']
-
         self.candle = self.geko.get_asset_candle(
             self.id, time_period=time_period, currency=currency)
 
@@ -25,7 +25,6 @@ class Candle:
     def get_rsi(self):
         """ Return relative strength indicator of a currency"""
         diff = self.df[1] - self.df[4]
-
         average_gain = diff[diff > 0].mean()
         average_loss = diff[diff < 0].mean() * -1
 
@@ -33,7 +32,12 @@ class Candle:
         relative_strength_indicator = 100 - 100 / (1 + relative_strength)
 
         return relative_strength_indicator
-
+    def get_returns(self):
+        returns = np.log(self.df[1]/self.df[4])
+        volatility = (returns.std() * np.sqrt(252))
+        sharpe_ratio = (returns.mean() - 0.01) / volatility
+         
+        return sharpe_ratio
     def plot_candle(self):
         """ Plots the candlesticks for a given time period"""
         symbol = self.api.get_symbol(self.id)
@@ -172,3 +176,6 @@ class BoilerBands:
         ))
 
         fig.write_image("boiler_bands.png")
+c = Candle("bitcoin")
+sharperatio = c.get_returns()
+print(rsi)
