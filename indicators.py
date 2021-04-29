@@ -44,7 +44,7 @@ class Candle:
 
         fig.update_layout(xaxis_rangeslider_visible=False,
                           yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=".1f")
-        fig.write_image("fig1.png")
+        fig.write_image("candle.png")
 
 
 class MovingAverages():
