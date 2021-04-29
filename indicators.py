@@ -59,7 +59,7 @@ class MovingAverages():
         converter = Converter()
 
         interval = "d1"
-        if num_days < 20:
+        if num_days < 30:
             self.n = 5
             interval = "h12"
         if num_days < 10:
@@ -125,7 +125,7 @@ class BoilerBands:
         converter = Converter()
 
         interval = "d1"
-        if num_days < 20:
+        if num_days < 30:
             self.n = 5
             interval = "h12"
         if num_days < 10:
