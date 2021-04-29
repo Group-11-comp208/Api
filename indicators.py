@@ -128,8 +128,3 @@ class BoilerBands:
         ))
 
         fig.write_image("boiler_bands.png")
-
-
-bb = BoilerBands("eth")
-
-bb.plot()
