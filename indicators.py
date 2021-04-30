@@ -187,9 +187,9 @@ class BoilerBands:
 
     def get_signal(self):
         self.df['buy'] = np.where(
-            self.df['priceUsd'] > self.df['upper_band'], 'buy', 'hold')
+            self.df['priceUsd'] < self.df['lower_band'], 'buy', 'hold')
         self.df['sell'] = np.where(
-            self.df['priceUsd'] < self.df['lower_band'], 'sell', 'hold')
+            self.df['priceUsd'] > self.df['upper_band'], 'sell', 'hold')
 
         tmp = self.df.iloc[[-1]]
         return tmp['buy'].values[0], tmp['sell'].values[0]
