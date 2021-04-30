@@ -191,7 +191,7 @@ class BoilerBands:
         self.df['sell'] = np.where(
             self.df['priceUsd'] < self.df['lower_band'], 'sell', 'hold')
 
-        return self.df.iloc[[-1]]
+        return self.df.iloc[[-1]].to_markdown()
 
 
 class Returns:
