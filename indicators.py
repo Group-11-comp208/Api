@@ -5,18 +5,30 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
 from fx import Converter
-import math
-
 
 class Candle:
-    def __init__(self, asset, time_period=14, currency='usd'):
+    def __init__(self, asset, time_period=30, currency='usd'):
         self.currency = currency
         self.api = coincap.CoinCap()
         self.geko = geko.Geko()
         self.asset = self.api.get_asset(asset)
         self.id = self.asset['id']
+
+        period = time_period
+
+        if time_period <= 7:
+            period = 14
+        if time_period >= 14 and time_period < 50:
+            period = 30
+        if time_period >= 50 and time_period < 120:
+            period = 90
+        if time_period >= 120 and time_period < 250:
+            period = 180
+        if time_period >= 250:
+            period = 365
+
         self.candle = self.geko.get_asset_candle(
-            self.id, time_period=time_period, currency=currency)
+            self.id, time_period=period, currency=currency)
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle).astype(float)
@@ -32,12 +44,7 @@ class Candle:
         relative_strength_indicator = 100 - 100 / (1 + relative_strength)
 
         return relative_strength_indicator
-    def get_returns(self):
-        returns = np.log(self.df[1]/self.df[4])
-        volatility = (returns.std() * np.sqrt(252))
-        sharpe_ratio = (returns.mean() - 0.01) / volatility
 
-        return sharpe_ratio
     def plot_candle(self):
         """ Plots the candlesticks for a given time period"""
         symbol = self.api.get_symbol(self.id)
@@ -176,6 +183,41 @@ class BoilerBands:
         ))
 
         fig.write_image("boiler_bands.png")
-c = Candle("bitcoin")
-sharperatio = c.get_returns()
-print(sharperatio)
+
+
+class Returns:
+    def __init__(self, asset, currency='usd', num_days=365, risk_free=0.01):
+        self.rf = risk_free
+        self.currency = currency
+        self.api = coincap.CoinCap()
+        self.asset = self.api.get_asset(asset)
+        self.id = self.asset['id']
+        converter = Converter()
+
+        interval = "d1"
+        if num_days < 30:
+            self.n = 5
+            interval = "h12"
+        if num_days < 10:
+            self.n = 2
+            interval = "h6"
+        if num_days < 5:
+            self.n = 2
+            interval = "h2"
+
+        history = self.api.get_asset_history(
+            self.id, num_days=num_days, interval=interval)['data']
+        self.df = pd.DataFrame(
+            history, columns=['priceUsd', 'time']).astype(float)
+
+        self.currency_symbol = converter.get_symbol(currency)
+        if currency != "usd":
+            rate = converter.get_rate(currency)
+            self.df['priceUsd'] = self.df['priceUsd'] * rate
+
+    def calculate_returns(self):
+        returns = self.df['priceUsd'].cumsum()
+        returns = (returns - returns.shift(1))/returns.shift(1)
+        sharpe_ratio = (returns.mean() - self.rf)/returns.std() * np.sqrt(252)
+
+        return sharpe_ratio
