@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 from fx import Converter
 
+
 class Candle:
     def __init__(self, asset, time_period=30, currency='usd'):
         self.currency = currency
@@ -60,7 +61,7 @@ class Candle:
         fig.write_image("candle.png")
 
 
-class MovingAverages():
+class MovingAverages:
     def __init__(self, asset, currency='usd', num_days=120):
         self.n = 10
         self.currency = currency
@@ -127,7 +128,7 @@ class MovingAverages():
 
 
 class BoilerBands:
-    def __init__(self, asset, currency='usd', num_days=120):
+    def __init__(self, asset, currency='usd', num_days=120, num_sd=2):
         self.n = 10
         self.currency = currency
         self.api = coincap.CoinCap()
@@ -156,13 +157,13 @@ class BoilerBands:
             rate = converter.get_rate(currency)
             self.df['priceUsd'] = self.df['priceUsd'] * rate
 
-    def plot(self, num_sd=2):
-        symbol = self.api.get_symbol(self.id)
-
         self.df['sma'] = self.df['priceUsd'].rolling(window=self.n).mean()
         self.df['std'] = self.df['priceUsd'].rolling(window=self.n).std()
-        self.df['lower_band'] = self.df['sma'] + (self.df['std'] * num_sd)
-        self.df['upper_band'] = self.df['sma'] - (self.df['std'] * num_sd)
+        self.df['upper_band'] = self.df['sma'] + (self.df['std'] * num_sd)
+        self.df['lower_band'] = self.df['sma'] - (self.df['std'] * num_sd)
+
+    def plot(self):
+        symbol = self.api.get_symbol(self.id)
 
         fig = go.Figure(data=[go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Lower Band", name="Lower Band", y=self.df['lower_band'], line=dict(color='red', width=2)),
                               go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Upper Band", name="Upper Band", y=self.df['upper_band'], line=dict(
@@ -183,6 +184,14 @@ class BoilerBands:
         ))
 
         fig.write_image("boiler_bands.png")
+
+    def get_signal(self):
+        self.df['buy'] = np.where(
+            self.df['priceUsd'] > self.df['upper_band'], 'buy', 'hold')
+        self.df['sell'] = np.where(
+            self.df['priceUsd'] < self.df['lower_band'], 'sell', 'hold')
+
+        return self.df.iloc[[-1]]
 
 
 class Returns:
