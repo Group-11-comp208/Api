@@ -192,7 +192,7 @@ class BoilerBands:
             self.df['priceUsd'] < self.df['lower_band'], 'sell', 'hold')
 
         tmp = self.df.iloc[[-1]]
-        return tmp['buy'], tmp['sell']
+        return tmp['buy'].values[0], tmp['sell'].values[0]
 
 
 class Returns:
