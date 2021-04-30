@@ -36,7 +36,7 @@ class Candle:
         returns = np.log(self.df[1]/self.df[4])
         volatility = (returns.std() * np.sqrt(252))
         sharpe_ratio = (returns.mean() - 0.01) / volatility
-         
+
         return sharpe_ratio
     def plot_candle(self):
         """ Plots the candlesticks for a given time period"""
@@ -178,4 +178,4 @@ class BoilerBands:
         fig.write_image("boiler_bands.png")
 c = Candle("bitcoin")
 sharperatio = c.get_returns()
-print(rsi)
+print(sharperatio)
