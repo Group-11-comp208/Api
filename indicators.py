@@ -91,8 +91,6 @@ class MovingAverages:
             rate = converter.get_rate(currency)
             self.df['priceUsd'] = self.df['priceUsd'] * rate
 
-    def plot(self):
-        symbol = self.api.get_symbol(self.id)
         alpha = 2 / (self.n + 1)
 
         self.df.loc[0, 'ema'] = self.df.loc[0, 'priceUsd']
@@ -104,6 +102,10 @@ class MovingAverages:
         exp1 = self.df['priceUsd'].ewm(span=12, adjust=False).mean()
         exp2 = self.df['priceUsd'].ewm(span=26, adjust=False).mean()
         self.df['mcad'] = exp1 - exp2
+        self.df['signal'] = self.df['mcad'].ewm(span=9, adjust=False).mean()
+
+    def plot(self):
+        symbol = self.api.get_symbol(self.id)
 
         max_value = self.df['mcad'].max() * 1.5
 
@@ -112,7 +114,9 @@ class MovingAverages:
                                   self.df['time'], unit='ms'), text="Price", name="Price", y=self.df['priceUsd'], line=dict(color='red', width=2)),
                               go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Simple Moving Average",
                                          name="SMA", y=self.df['sma'], line=dict(color='green', width=2)),
-                              go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Moving average convergence divergence ", name="MACD", y=self.df['mcad'], line=dict(color='blue', width=2), yaxis='y2')])
+                              go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Moving average convergence divergence ",
+                                         name="MACD", y=self.df['mcad'], line=dict(color='blue', width=2), yaxis='y2'),
+                              go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Signal Line", name="Signal Line", y=self.df['signal'], line=dict(color='purple', width=2), yaxis='y2')])
 
         fig.update_layout(yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(
         ), symbol), yaxis_tickformat=".0f", yaxis2=dict(title='MCAD', overlaying='y', side='right', range=[-max_value, max_value]))
