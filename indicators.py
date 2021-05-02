@@ -20,11 +20,23 @@ class Candle:
         exchanges = self.api.get_exchange_by_quote(self.id)['data']
         exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
+        if time_period < 5:
+            interval = "h1"
+
+        if time_period >= 5:
+            interval = "h2"
+
+        if time_period >= 15:
+            interval = "h4"
+
+        if time_period >= 30:
+            interval = "h8"
+
         for exchange in exchanges:
             try:
                 self.candle = self.api.get_asset_candle(
                     self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
-                if len(self.candle['data']) > time_period * 3:
+                if len(self.candle['data']) > time_period * (24/int(interval[1]) - 1):
                     # Ensure data has all data points
                     break
             except Exception as e:
@@ -83,7 +95,7 @@ class Candle:
                                              close=df['close'], name="OHLC"),
                               go.Scatter(x=df['period'], text="Lower Band", name="Lower Boiler Band",
                                          y=self.df['lower_band'], line=dict(color='blue', width=1)),
-                              go.Scatter(x=df['period'], text="Upper Boiler Band", name="Upper Boiler Band", y=self.df['upper_band'], line=dict(
+                              go.Scatter(x=df['period'], text="Upper Bollinger Band", name="Upper Bollinger Band", y=self.df['upper_band'], line=dict(
                                                               color='blue', width=1), fill='tonexty')])
 
         fig.update_layout(xaxis_rangeslider_visible=False,
@@ -104,9 +116,11 @@ class Candle:
         self.df['sell'] = np.where(
             self.df['close'] > self.df['upper_band'], 'sell', 'hold')
 
-        self.df['time'] = self.df['period'].apply(lambda x: x.strftime('%H:%M'))
+        self.df['time'] = self.df['period'].apply(
+            lambda x: x.strftime('%H:%M'))
 
         return self.df[['time', 'buy', 'sell']].tail().to_markdown(index=False)
+
 
 class MovingAverages:
     def __init__(self, asset, currency='usd', num_days=120):
