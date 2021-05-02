@@ -18,13 +18,13 @@ class Candle:
         converter = Converter()
 
         exchanges = self.api.get_exchange_by_quote(self.id)['data']
-        exchanges = sorted(exchanges, key=lambda k: float(k['percentExchangeVolume']))
+        exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
 
         for exchange in exchanges:
             self.candle = self.api.get_asset_candle(
                 self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
-            if len(self.candle['data']) != 0:
+            if len(self.candle['data']) == time_period:
                 break
 
         # Prepare the candle data using pandas
@@ -36,7 +36,7 @@ class Candle:
             rate = converter.get_rate(currency)
             for row in self.df:
                 if row != 'period':
-                    self.df[row] = self.df.row * rate
+                    self.df[row] = self.df[row] * rate
 
         self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
 
@@ -75,10 +75,6 @@ class Candle:
         fig.update_layout(xaxis_rangeslider_visible=False,
                           yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=".1f")
         fig.write_image("candle.png")
-
-
-candle = Candle("xrp")
-candle.plot_candle()
 
 
 class MovingAverages:
