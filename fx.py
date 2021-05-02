@@ -13,7 +13,7 @@ class Converter:
         if response.status_code != 200:
             raise Exception('The server has responded with an error')
         
-        self.curreny = json.loads(response.text)
+        self.currency = json.loads(response.text)
         
         response = requests.request("GET", "https://gist.githubusercontent.com/Fluidbyte/2973986/raw/8bb35718d0c90fdacb388961c98b8d56abc392c9/Common-Currency.json")
 
@@ -24,7 +24,7 @@ class Converter:
         
 
     def get_rate(self, currency):
-        rate = self.curreny[currency.lower()]['rate']
+        rate = self.currency[currency.lower()]['rate']
         return rate
 
     def get_symbol(self, currency):
