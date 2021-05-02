@@ -36,3 +36,23 @@ timestamp	1618093941684
 repsonse[data][id] -> bitcoin
 repsonse[data][priceUsd] -> 59327.9678729268120594
 ```
+
+# fx currency convert class 
+A python class to convert the currencies 
+
+## Usage
+
+```
+from fx import Converter
+
+converter = Converter()
+```
+
+### Example: get exchange rate for USD (default currency) to GBP
+ ```
+ converter.get_rate("GBP")
+ ```
+##### Response
+```
+0.71930929108829
+```
