@@ -21,22 +21,29 @@ class Candle:
         exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
         if time_period < 5:
+            n = 24 - 1
             interval = "h1"
-
         if time_period >= 5:
+            n = 12 - 1
             interval = "h2"
-
         if time_period >= 15:
+            n = 6 - 0.5
             interval = "h4"
-
-        if time_period >= 30:
+        if time_period >= 60:
+            n = 3 - 0.1
             interval = "h8"
+        if time_period >= 90:
+            n = 2 - 0.1
+            interval = "h12"
+        if time_period >= 180:
+            n = 0.9
+            interval = "d1"
 
         for exchange in exchanges:
             try:
                 self.candle = self.api.get_asset_candle(
                     self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
-                if len(self.candle['data']) > time_period * (24/int(interval[1]) - 1):
+                if len(self.candle['data']) > time_period * n:
                     # Ensure data has all data points
                     break
             except Exception as e:
@@ -54,9 +61,9 @@ class Candle:
 
         self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
         self.df['sma'] = ((self.df['high'] + self.df['low']) /
-                          2).rolling(window=7).mean()
+                          2).rolling(window=10).mean()
         self.df['std'] = ((self.df['high'] + self.df['low']) /
-                          2).rolling(window=7).std()
+                          2).rolling(window=10).std()
         self.df['upper_band'] = self.df['sma'] + (self.df['std'] * 2)
         self.df['lower_band'] = self.df['sma'] - (self.df['std'] * 2)
 
@@ -103,9 +110,9 @@ class Candle:
 
         fig.update_layout(legend=dict(
             yanchor="top",
-            y=0.99,
-            xanchor="left",
-            x=0.01,
+            y=1.25,
+            xanchor="right",
+            x=0.99,
         ))
 
         fig.write_image("candle.png")
