@@ -10,7 +10,10 @@ class CoinCap:
 
     def _query(self, endpoint):
         """Returns json as dictionary"""
-        response = requests.request("GET", self.url + endpoint)
+
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
+
+        response = requests.request("GET", self.url + endpoint, headers=headers)
 
         if response.status_code != 200:
             raise Exception('The server has responded with an error')
@@ -48,8 +51,16 @@ class CoinCap:
     def get_exchange(self, exchange):
         return self._query("exchanges/{}".format(exchange))
 
+    def get_exchange_by_quote(self, base_id, quote_id="united-states-dollar"):
+        return self._query("markets?quoteId={}&baseId={}".format(quote_id, base_id))
+
     def get_markets(self):
         return self._query("markets")
+
+    def get_asset_candle(self, base_id, exchange, quote_id="bitcoin", interval="d1", time_period=14):
+        start, end = self._get_date(time_period)
+        return self._query(
+            "candles?exchange={}&interval={}&baseId={}&quoteId={}&start={}&end={}".format(exchange, interval, base_id, quote_id, start, end))
 
     def get_symbol(self, asset):
         return self.get_asset(asset)['symbol']

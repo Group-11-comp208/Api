@@ -1,5 +1,4 @@
 import coincap
-import geko
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -8,36 +7,43 @@ from fx import Converter
 
 
 class Candle:
-    def __init__(self, asset, time_period=30, currency='usd'):
+    def __init__(self, base_id, quote_id="united-states-dollar", interval="d1", time_period=60, currency="usd"):
+        self.api = coincap.CoinCap()
+        self.asset = base_id
         self.currency = currency
         self.api = coincap.CoinCap()
-        self.geko = geko.Geko()
-        self.asset = self.api.get_asset(asset)
+        self.asset = self.api.get_asset(self.asset)
+
         self.id = self.asset['id']
+        converter = Converter()
 
-        period = time_period
+        exchanges = self.api.get_exchange_by_quote(self.id)['data']
+        exchanges = sorted(exchanges, key=lambda k: float(k['percentExchangeVolume']))
 
-        if time_period <= 7:
-            period = 14
-        if time_period >= 14 and time_period < 50:
-            period = 30
-        if time_period >= 50 and time_period < 120:
-            period = 90
-        if time_period >= 120 and time_period < 250:
-            period = 180
-        if time_period >= 250:
-            period = 365
 
-        self.candle = self.geko.get_asset_candle(
-            self.id, time_period=period, currency=currency)
+        for exchange in exchanges:
+            self.candle = self.api.get_asset_candle(
+                self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
+            if len(self.candle['data']) != 0:
+                break
 
         # Prepare the candle data using pandas
-        self.df = pd.DataFrame(self.candle).astype(float)
-        self.df[0] = pd.to_datetime(self.df[0], unit='ms')
+        self.df = pd.DataFrame(self.candle['data']).astype(float)
+
+
+        self.currency_symbol = converter.get_symbol(currency)
+        if currency != "usd":
+            rate = converter.get_rate(currency)
+            for row in self.df:
+                if row != 'period':
+                    self.df[row] = self.df.row * rate
+
+        self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
 
     def get_rsi(self):
         """ Return relative strength indicator of a currency"""
-        diff = self.df[1] - self.df[4]
+        diff = self.df['open'] - self.df['close']
+
         average_gain = diff[diff > 0].mean()
         average_loss = diff[diff < 0].mean() * -1
 
@@ -46,19 +52,33 @@ class Candle:
 
         return relative_strength_indicator
 
+    def get_obv(self):
+        """ Returns on-balance volume indicator of a currency"""
+        diff = self.df['open'] - self.df['close']
+
+        p_volume = np.sum(self.df['volume'][diff > 0])
+        n_volume = np.sum(self.df['volume'][diff < 0])
+        obv = p_volume - n_volume
+
+        return obv
+
     def plot_candle(self):
         """ Plots the candlesticks for a given time period"""
         symbol = self.api.get_symbol(self.id)
         df = self.df
-        fig = go.Figure(data=[go.Candlestick(x=df[0],
-                                             open=df[1],
-                                             high=df[2],
-                                             low=df[3],
-                                             close=df[4])])
+        fig = go.Figure(data=[go.Candlestick(x=df['period'],
+                                             open=df['open'],
+                                             high=df['high'],
+                                             low=df['low'],
+                                             close=df['close'])])
 
         fig.update_layout(xaxis_rangeslider_visible=False,
                           yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=".1f")
         fig.write_image("candle.png")
+
+
+candle = Candle("xrp")
+candle.plot_candle()
 
 
 class MovingAverages:
