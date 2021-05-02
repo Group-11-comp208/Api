@@ -104,7 +104,7 @@ class Candle:
         self.df['sell'] = np.where(
             self.df['close'] > self.df['upper_band'], 'sell', 'hold')
 
-        return self.df[['period', 'buy', 'sell']].tail().to_markdown()
+        return self.df[['period', 'buy', 'sell']].tail().to_markdown(index=False)
 
 
 class MovingAverages:
@@ -175,6 +175,7 @@ class MovingAverages:
         ))
 
         fig.write_image("moving_averages.png")
+
 
 class Returns:
     def __init__(self, asset, currency='usd', num_days=365, risk_free=0.01):
