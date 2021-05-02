@@ -20,7 +20,6 @@ class Candle:
         exchanges = self.api.get_exchange_by_quote(self.id)['data']
         exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
-
         for exchange in exchanges:
             self.candle = self.api.get_asset_candle(
                 self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
@@ -29,7 +28,6 @@ class Candle:
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle['data']).astype(float)
-
 
         self.currency_symbol = converter.get_symbol(currency)
         if currency != "usd":
@@ -73,7 +71,7 @@ class Candle:
                                              close=df['close'])])
 
         fig.update_layout(xaxis_rangeslider_visible=False,
-                          yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=".1f")
+                          yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=",.1f")
         fig.write_image("candle.png")
 
 
@@ -135,7 +133,7 @@ class MovingAverages:
                               go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Signal Line", name="Signal Line", y=self.df['signal'], line=dict(color='purple', width=2), yaxis='y2')])
 
         fig.update_layout(yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(
-        ), symbol), yaxis_tickformat=".0f", yaxis2=dict(title='MCAD', overlaying='y', side='right', range=[-max_value, max_value]))
+        ), symbol), yaxis_tickformat=",.1f", yaxis2=dict(title='MCAD', overlaying='y', side='right', range=[-max_value, max_value]))
 
         fig.update_layout(legend=dict(
             yanchor="top",
@@ -194,7 +192,7 @@ class BoilerBands:
                                          name="SMA", y=self.df['sma'], line=dict(color='green', width=2))])
 
         fig.update_layout(yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(
-            self.currency.upper(), symbol), yaxis_tickformat=".0f")
+            self.currency.upper(), symbol), yaxis_tickformat=",.1f")
 
         fig.update_layout(legend=dict(
             yanchor="top",
