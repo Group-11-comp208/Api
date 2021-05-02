@@ -7,7 +7,7 @@ from fx import Converter
 
 
 class Candle:
-    def __init__(self, base_id, quote_id="united-states-dollar", interval="d1", time_period=60, currency="usd"):
+    def __init__(self, base_id, quote_id="united-states-dollar", interval="h4", time_period=30, currency="usd"):
         self.api = coincap.CoinCap()
         self.asset = base_id
         self.currency = currency
@@ -21,10 +21,14 @@ class Candle:
         exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
         for exchange in exchanges:
-            self.candle = self.api.get_asset_candle(
-                self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
-            if len(self.candle['data']) == time_period:
-                break
+            try:
+                self.candle = self.api.get_asset_candle(
+                    self.id, exchange['exchangeId'], quote_id=quote_id, interval=interval, time_period=time_period)
+                if len(self.candle['data']) > time_period * 3:
+                    # Ensure data has all data points
+                    break
+            except Exception as e:
+                print(e)
 
         # Prepare the candle data using pandas
         self.df = pd.DataFrame(self.candle['data']).astype(float)
@@ -37,6 +41,14 @@ class Candle:
                     self.df[row] = self.df[row] * rate
 
         self.df['period'] = pd.to_datetime(self.df['period'], unit='ms')
+        self.df['sma'] = ((self.df['high'] + self.df['low']) /
+                          2).rolling(window=7).mean()
+        self.df['std'] = ((self.df['high'] + self.df['low']) /
+                          2).rolling(window=7).std()
+        self.df['upper_band'] = self.df['sma'] + (self.df['std'] * 2)
+        self.df['lower_band'] = self.df['sma'] - (self.df['std'] * 2)
+
+        self.df = self.df.dropna()
 
     def get_rsi(self):
         """ Return relative strength indicator of a currency"""
@@ -68,10 +80,22 @@ class Candle:
                                              open=df['open'],
                                              high=df['high'],
                                              low=df['low'],
-                                             close=df['close'])])
+                                             close=df['close'], name="OHLC"),
+                              go.Scatter(x=df['period'], text="Lower Band", name="Lower Boiler Band",
+                                         y=self.df['lower_band'], line=dict(color='blue', width=1)),
+                              go.Scatter(x=df['period'], text="Upper Boiler Band", name="Upper Boiler Band", y=self.df['upper_band'], line=dict(
+                                                              color='blue', width=1), fill='tonexty')])
 
         fig.update_layout(xaxis_rangeslider_visible=False,
                           yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(), symbol),  yaxis_tickformat=",.1f")
+
+        fig.update_layout(legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01,
+        ))
+
         fig.write_image("candle.png")
 
 
