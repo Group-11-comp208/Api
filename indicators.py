@@ -104,7 +104,7 @@ class Candle:
         self.df['sell'] = np.where(
             self.df['close'] > self.df['upper_band'], 'sell', 'hold')
 
-        return self.df[['period', 'buy', 'sell']].tail().to_markdown
+        return self.df[['period', 'buy', 'sell']].tail().to_markdown()
 
 
 class MovingAverages:
