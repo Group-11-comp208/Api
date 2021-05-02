@@ -98,6 +98,14 @@ class Candle:
 
         fig.write_image("candle.png")
 
+    def get_signal(self):
+        self.df['buy'] = np.where(
+            self.df['close'] < self.df['lower_band'], 'buy', 'hold')
+        self.df['sell'] = np.where(
+            self.df['close'] > self.df['upper_band'], 'sell', 'hold')
+
+        return self.df[['period', 'buy', 'sell']].tail().to_markdown
+
 
 class MovingAverages:
     def __init__(self, asset, currency='usd', num_days=120):
