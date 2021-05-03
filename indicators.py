@@ -21,13 +21,13 @@ class Candle:
         exchanges = sorted(exchanges, key=lambda k: float(k['rank']))
 
         if time_period < 5:
-            n = 48 - 1
+            n = 48 - 0.5
             interval = "m30"
         if time_period >= 5:
-            n = 24 - 1
+            n = 24 - 0.4
             interval = "h1"
         if time_period >= 15:
-            n = 6 - 0.5
+            n = 6 - 0.4
             interval = "h4"
         if time_period >= 60:
             n = 3 - 0.1
