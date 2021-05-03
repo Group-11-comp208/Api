@@ -100,7 +100,7 @@ class Candle:
                                              high=df['high'],
                                              low=df['low'],
                                              close=df['close'], name="OHLC"),
-                              go.Scatter(x=df['period'], text="Lower Band", name="Lower Boiler Band",
+                              go.Scatter(x=df['period'], text="Lower Band", name="Lower Bollinger Band",
                                          y=self.df['lower_band'], line=dict(color='blue', width=1)),
                               go.Scatter(x=df['period'], text="Upper Bollinger Band", name="Upper Bollinger Band", y=self.df['upper_band'], line=dict(
                                                               color='blue', width=1), fill='tonexty')])
