@@ -187,7 +187,7 @@ class MovingAverages:
                               go.Scatter(x=pd.to_datetime(self.df['time'], unit='ms'), text="Signal Line", name="Signal Line", y=self.df['signal'], line=dict(color='purple', width=2), yaxis='y2')])
 
         fig.update_layout(yaxis_title=symbol, xaxis_title="Time", title="{} vs {}".format(self.currency.upper(
-        ), symbol), yaxis_tickformat=",.1f", yaxis2=dict(title='MCAD', overlaying='y', side='right', range=[-max_value, max_value]))
+        ), symbol), yaxis_tickformat=",.1f", yaxis2=dict(title='MCAD & Signal', overlaying='y', side='right', range=[-max_value, max_value]))
 
         fig.update_layout(legend=dict(
             yanchor="top",
@@ -197,7 +197,6 @@ class MovingAverages:
         ))
 
         fig.write_image("moving_averages.png")
-
 
 class Returns:
     def __init__(self, asset, currency='usd', num_days=365, risk_free=0.01):
